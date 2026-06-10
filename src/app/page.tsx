@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { devLogin } from "./dev-login/actions";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: { devError?: string } }) {
   const supabase = createClient();
   try {
     const { data: { user } } = await supabase.auth.getUser();
@@ -35,10 +34,13 @@ export default async function Home() {
         Pick your path. CVeed&apos;s AI takes it from there.
       </p>
 
+      {searchParams.devError && (
+        <p className="mt-6 max-w-md rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-600">{searchParams.devError}</p>
+      )}
+
       <div className="mt-10 grid w-full max-w-2xl animate-fade-up gap-4 [animation-delay:180ms] sm:grid-cols-2">
         <ChoiceCard
-          href={bypass ? undefined : "/signup?role=employer"}
-          action={bypass ? devLogin.bind(null, "employer") : undefined}
+          href={bypass ? "/dev-enter?as=employer" : "/signup?role=employer"}
           title="I'm hiring"
           desc="Describe a role and get a ranked, explained shortlist."
           cta="Start hiring"
@@ -46,8 +48,7 @@ export default async function Home() {
           accent
         />
         <ChoiceCard
-          href={bypass ? undefined : "/signup?role=candidate"}
-          action={bypass ? devLogin.bind(null, "candidate") : undefined}
+          href={bypass ? "/dev-enter?as=candidate" : "/signup?role=candidate"}
           title="I'm looking for a job"
           desc="Build your profile once and get discovered by employers."
           cta="Create profile"
@@ -70,14 +71,16 @@ export default async function Home() {
 }
 
 function ChoiceCard({
-  href, action, title, desc, cta, icon, accent = false,
+  href, title, desc, cta, icon, accent = false,
 }: {
-  href?: string;
-  action?: () => void;
+  href: string;
   title: string; desc: string; cta: string; icon: React.ReactNode; accent?: boolean;
 }) {
-  const inner = (
-    <>
+  return (
+    <Link
+      href={href}
+      className="card group flex w-full flex-col items-start p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift"
+    >
       <span className={`grid h-11 w-11 place-items-center rounded-xl ${accent ? "bg-brand text-white" : "bg-brand-light text-brand"}`}>
         {icon}
       </span>
@@ -89,19 +92,8 @@ function ChoiceCard({
           <path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-    </>
+    </Link>
   );
-
-  const cls = "card group flex w-full flex-col items-start p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift";
-
-  if (action) {
-    return (
-      <form action={action} className="contents">
-        <button type="submit" className={cls}>{inner}</button>
-      </form>
-    );
-  }
-  return <Link href={href!} className={cls}>{inner}</Link>;
 }
 
 function BriefcaseIcon() {
