@@ -1,52 +1,101 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Logo } from "@/components/Logo";
 
 export default async function Home() {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Logged-in users go straight to their home.
-  if (user) {
-    const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-    if (data?.role === "employer") redirect("/employer");
-    if (data?.role === "admin") redirect("/admin");
-    redirect("/candidate/profile");
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      if (data?.role === "employer") redirect("/employer");
+      if (data?.role === "admin") redirect("/admin");
+      redirect("/candidate/profile");
+    }
+  } catch {
+    // not configured — render the public landing
   }
 
   return (
-    <div className="space-y-12">
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-brand-light to-white px-6 py-16 text-center">
-        <div className="mb-5 flex justify-center">
-          <Logo size={56} />
-        </div>
-        <span className="chip">Qatar &amp; GCC · for SMEs</span>
-        <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-          The AI recruiter that finds talent <span className="text-brand">for you</span>.
-        </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">
-          Not a job board. Candidates build one living profile. Employers describe who they need in plain language.
-          CVeed&apos;s AI reads, structures, and ranks — so hiring takes minutes, not weeks.
-        </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link href="/signup?role=employer" className="btn-primary">I&apos;m hiring</Link>
-          <Link href="/signup?role=candidate" className="btn-ghost">I&apos;m looking</Link>
-        </div>
-      </section>
+    <section className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center pb-24 text-center">
+      <span className="pill animate-fade-up">Talent discovery for SMEs · Qatar &amp; GCC</span>
 
-      <section className="grid gap-6 sm:grid-cols-3">
-        {[
-          { t: "Upload once", d: "Candidates upload a CV. The CV Intelligence Agent extracts skills, experience, certifications and more — no long forms." },
-          { t: "Describe the need", d: "Employers type “I need a sales manager with automotive experience and fluent Arabic.” The AI Recruiter turns it into a structured brief." },
-          { t: "AI ranks everyone", d: "The Screening Agent scores every candidate with a match %, strengths, gaps and risks — and explains why." },
-        ].map((f) => (
-          <div key={f.t} className="card">
-            <h3 className="font-semibold text-slate-900">{f.t}</h3>
-            <p className="mt-2 text-sm text-slate-600">{f.d}</p>
-          </div>
-        ))}
-      </section>
-    </div>
+      <h1 className="mt-7 max-w-2xl animate-fade-up text-[34px] font-semibold leading-[1.08] tracking-[-0.03em] text-ink [animation-delay:60ms] sm:text-[52px]">
+        Are you hiring, or
+        <br className="hidden sm:block" /> looking for a job?
+      </h1>
+
+      <p className="mt-5 max-w-md animate-fade-up text-[16px] leading-relaxed text-ink/55 [animation-delay:120ms]">
+        Pick your path. CVeed&apos;s AI takes it from there.
+      </p>
+
+      <div className="mt-10 grid w-full max-w-2xl animate-fade-up gap-4 [animation-delay:180ms] sm:grid-cols-2">
+        <ChoiceCard
+          href="/signup?role=employer"
+          title="I'm hiring"
+          desc="Describe a role and get a ranked, explained shortlist."
+          cta="Start hiring"
+          icon={<BriefcaseIcon />}
+          accent
+        />
+        <ChoiceCard
+          href="/signup?role=candidate"
+          title="I'm looking for a job"
+          desc="Build your profile once and get discovered by employers."
+          cta="Create profile"
+          icon={<SparkIcon />}
+        />
+      </div>
+
+      <p className="mt-8 animate-fade-up text-sm text-ink/45 [animation-delay:240ms]">
+        Already have an account?{" "}
+        <Link href="/login" className="font-medium text-brand hover:text-brand-dark">Sign in</Link>
+      </p>
+    </section>
+  );
+}
+
+function ChoiceCard({
+  href, title, desc, cta, icon, accent = false,
+}: {
+  href: string; title: string; desc: string; cta: string; icon: React.ReactNode; accent?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="card group flex flex-col items-start p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift"
+    >
+      <span
+        className={`grid h-11 w-11 place-items-center rounded-xl ${accent ? "bg-brand text-white" : "bg-brand-light text-brand"}`}
+      >
+        {icon}
+      </span>
+      <h3 className="mt-4 text-lg font-semibold text-ink">{title}</h3>
+      <p className="mt-1.5 text-sm leading-relaxed text-ink/55">{desc}</p>
+      <span className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-brand">
+        {cta}
+        <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 20 20" fill="none">
+          <path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    </Link>
+  );
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+      <rect x="3" y="7" width="18" height="13" rx="2.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 7V5.5A1.5 1.5 0 019.5 4h5A1.5 1.5 0 0116 5.5V7M3 12h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SparkIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3c.6 4 1.6 5 5.5 5.5C13.6 9 12.6 10 12 14c-.6-4-1.6-5-5.5-5.5C10.4 8 11.4 7 12 3Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M18.5 14c.3 1.8.8 2.3 2.5 2.6-1.7.3-2.2.8-2.5 2.4-.3-1.6-.8-2.1-2.5-2.4 1.7-.3 2.2-.8 2.5-2.6Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
   );
 }

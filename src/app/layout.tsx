@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./actions";
 import { Logo } from "@/components/Logo";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -13,58 +20,69 @@ export const metadata: Metadata = {
   description:
     "The AI recruiter for SMEs. Candidates build a profile once; employers describe who they need; AI does the matching.",
   applicationName: "CVeed",
-  appleWebApp: {
-    capable: true,
-    title: "CVeed",
-    statusBarStyle: "default",
-  },
+  appleWebApp: { capable: true, title: "CVeed", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: "#6C3EF4",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  let user = null;
   let role: string | null = null;
-  if (user) {
-    const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-    role = data?.role ?? null;
+  try {
+    const res = await supabase.auth.getUser();
+    user = res.data.user;
+    if (user) {
+      const { data } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+      role = data?.role ?? null;
+    }
+  } catch {
+    // env not configured (e.g. preview render) — treat as logged out
   }
 
   return (
-    <html lang="en">
-      <body>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen font-sans">
+        <header className="sticky top-0 z-40 border-b border-black/[0.06] bg-canvas/80 backdrop-blur-xl">
+          <div className="container-x flex h-16 items-center justify-between">
             <Link href="/" aria-label="CVeed home">
-              <Logo withWordmark />
+              <Logo />
             </Link>
-            <nav className="flex items-center gap-3 text-sm">
+            <nav className="flex items-center gap-2 text-sm">
               {user ? (
                 <>
-                  {role === "candidate" && <Link href="/candidate/profile" className="text-slate-600 hover:text-brand">My Profile</Link>}
-                  {role === "employer" && <Link href="/employer" className="text-slate-600 hover:text-brand">My Hiring</Link>}
-                  {role === "admin" && <Link href="/admin" className="text-slate-600 hover:text-brand">Admin</Link>}
-                  <span className="hidden text-slate-400 sm:inline">{user.email}</span>
+                  {role === "candidate" && (
+                    <Link href="/candidate/profile" className="rounded-lg px-3 py-2 text-ink/70 hover:text-ink">Profile</Link>
+                  )}
+                  {role === "employer" && (
+                    <Link href="/employer" className="rounded-lg px-3 py-2 text-ink/70 hover:text-ink">Hiring</Link>
+                  )}
+                  {role === "admin" && (
+                    <Link href="/admin" className="rounded-lg px-3 py-2 text-ink/70 hover:text-ink">Admin</Link>
+                  )}
                   <form action={signOut}>
                     <button className="btn-ghost" type="submit">Sign out</button>
                   </form>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-slate-600 hover:text-brand">Sign in</Link>
+                  <Link href="/login" className="rounded-lg px-3 py-2 text-ink/70 hover:text-ink">Sign in</Link>
                   <Link href="/signup" className="btn-primary">Get started</Link>
                 </>
               )}
             </nav>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-        <footer className="mx-auto max-w-5xl px-4 py-8 text-center text-xs text-slate-400">
-          CVeed · AI Talent Discovery for SMEs · Qatar &amp; GCC
+
+        <main>{children}</main>
+
+        <footer className="mt-24 border-t border-black/[0.06]">
+          <div className="container-x flex flex-col items-center justify-between gap-4 py-10 sm:flex-row">
+            <Logo />
+            <p className="text-xs text-ink/40">© {new Date().getFullYear()} CVeed · AI Talent Discovery · Qatar &amp; GCC</p>
+          </div>
         </footer>
       </body>
     </html>
