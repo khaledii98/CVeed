@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "@/components/Logo";
 
 export default async function Home() {
   const supabase = createClient();
@@ -16,7 +17,10 @@ export default async function Home() {
 
   return (
     <div className="space-y-12">
-      <section className="text-center">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-brand-light to-white px-6 py-16 text-center">
+        <div className="mb-5 flex justify-center">
+          <Logo size={56} />
+        </div>
         <span className="chip">Qatar &amp; GCC · for SMEs</span>
         <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
           The AI recruiter that finds talent <span className="text-brand">for you</span>.
