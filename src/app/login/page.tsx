@@ -1,31 +1,42 @@
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 import { signIn } from "./actions";
 
 export default function LoginPage({ searchParams }: { searchParams: { error?: string } }) {
   return (
-    <div className="mx-auto max-w-md">
-      <div className="card">
-        <h1 className="text-2xl font-bold">Welcome back</h1>
-        <p className="mt-1 text-sm text-slate-600">Sign in to CVeed.</p>
+    <div className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center py-12">
+      <div className="w-full max-w-[400px] animate-fade-up">
+        <div className="mb-6 flex justify-center">
+          <Logo height={28} />
+        </div>
 
-        {searchParams.error && (
-          <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{searchParams.error}</p>
-        )}
+        <div className="card-p">
+          <h1 className="text-center text-[22px] font-semibold tracking-[-0.02em] text-ink">Welcome back</h1>
+          <p className="mt-1.5 text-center text-sm text-ink/55">Sign in to your CVeed account.</p>
 
-        <form action={signIn} className="mt-6 space-y-4">
-          <div>
-            <label className="label">Email</label>
-            <input name="email" type="email" required className="input" placeholder="you@example.com" />
-          </div>
-          <div>
-            <label className="label">Password</label>
-            <input name="password" type="password" required className="input" />
-          </div>
-          <button type="submit" className="btn-primary w-full">Sign in</button>
-        </form>
+          {searchParams.error && (
+            <p className="mt-4 rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-600">{searchParams.error}</p>
+          )}
 
-        <p className="mt-4 text-center text-sm text-slate-500">
-          New here? <Link href="/signup" className="text-brand">Create an account</Link>
+          <form action={signIn} className="mt-6 space-y-4">
+            <div>
+              <label className="label">Email</label>
+              <input name="email" type="email" required className="input" placeholder="you@company.com" />
+            </div>
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="label">Password</label>
+                <span className="mb-1.5 text-xs text-ink/40">Forgot?</span>
+              </div>
+              <input name="password" type="password" required className="input" placeholder="Your password" />
+            </div>
+            <button type="submit" className="btn-primary w-full">Sign in</button>
+          </form>
+        </div>
+
+        <p className="mt-5 text-center text-sm text-ink/55">
+          New to CVeed?{" "}
+          <Link href="/signup" className="font-medium text-brand hover:text-brand-dark">Create an account</Link>
         </p>
       </div>
     </div>
