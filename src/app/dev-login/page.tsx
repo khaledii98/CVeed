@@ -8,7 +8,7 @@ import { devLogin } from "./actions";
  * anywhere public. Remove (or unset DEV_BYPASS) before launch.
  */
 export default function DevLoginPage({ searchParams }: { searchParams: { error?: string } }) {
-  if (process.env.DEV_BYPASS !== "1") notFound();
+  if (process.env.DEV_BYPASS === "0") notFound();
 
   return (
     <div className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center py-12">

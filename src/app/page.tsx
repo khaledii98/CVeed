@@ -17,9 +17,10 @@ export default async function Home() {
     // not configured — render the public landing
   }
 
-  // TESTING: when DEV_BYPASS=1, the cards drop you straight into the app
-  // (no sign-up / login page). Off for the public; removed before launch.
-  const bypass = process.env.DEV_BYPASS === "1";
+  // TESTING: login is bypassed by default during this phase — the cards drop
+  // you straight into the app with no sign-up/login. Set DEV_BYPASS=0 to turn
+  // real auth back on (we'll do that before launch).
+  const bypass = process.env.DEV_BYPASS !== "0";
 
   return (
     <section className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center pb-24 text-center">

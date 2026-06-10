@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <button className="btn-ghost" type="submit">Sign out</button>
                   </form>
                 </>
-              ) : process.env.DEV_BYPASS === "1" ? (
+              ) : process.env.DEV_BYPASS !== "0" ? (
                 <span className="chip">Testing mode</span>
               ) : (
                 <>

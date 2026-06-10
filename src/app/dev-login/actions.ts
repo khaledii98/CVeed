@@ -17,7 +17,7 @@ const DEMO = {
 const PASSWORD = "CveedDemo!2026";
 
 export async function devLogin(role: keyof typeof DEMO) {
-  if (process.env.DEV_BYPASS !== "1") redirect("/");
+  if (process.env.DEV_BYPASS === "0") redirect("/");
 
   const d = DEMO[role];
   const admin = createAdminClient();
