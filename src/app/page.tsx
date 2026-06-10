@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Logo } from "@/components/Logo";
 
 export default async function Home({ searchParams }: { searchParams: { devError?: string } }) {
   const supabase = createClient();
@@ -23,22 +24,26 @@ export default async function Home({ searchParams }: { searchParams: { devError?
 
   return (
     <section className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center pb-24 text-center">
-      <span className="pill animate-fade-up">Talent discovery for SMEs · Qatar &amp; GCC</span>
+      <span className="pill animate-fade-up">AI Talent Discovery · Qatar &amp; GCC</span>
 
-      <h1 className="mt-7 max-w-2xl animate-fade-up text-[34px] font-semibold leading-[1.08] tracking-[-0.03em] text-ink [animation-delay:60ms] sm:text-[52px]">
-        Are you hiring, or
-        <br className="hidden sm:block" /> looking for a job?
-      </h1>
+      <div className="mt-7 animate-fade-up [animation-delay:60ms]">
+        <Logo variant="wordmark" height={52} />
+      </div>
 
-      <p className="mt-5 max-w-md animate-fade-up text-[16px] leading-relaxed text-ink/55 [animation-delay:120ms]">
-        Pick your path. CVeed&apos;s AI takes it from there.
+      <p className="mt-6 max-w-xl animate-fade-up text-[17px] leading-relaxed text-ink/60 [animation-delay:120ms]">
+        CVeed uses AI to connect the right talent with the right opportunities — making hiring
+        and career growth smarter, faster, and more efficient.
+      </p>
+
+      <p className="mt-9 animate-fade-up text-sm font-medium text-ink/40 [animation-delay:150ms]">
+        Are you hiring, or looking for a job?
       </p>
 
       {searchParams.devError && (
         <p className="mt-6 max-w-md rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-600">{searchParams.devError}</p>
       )}
 
-      <div className="mt-10 grid w-full max-w-2xl animate-fade-up gap-4 [animation-delay:180ms] sm:grid-cols-2">
+      <div className="mt-5 grid w-full max-w-2xl animate-fade-up gap-4 [animation-delay:180ms] sm:grid-cols-2">
         <ChoiceCard
           href={bypass ? "/dev-enter?as=employer" : "/signup?role=employer"}
           title="I'm hiring"
