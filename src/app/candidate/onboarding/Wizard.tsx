@@ -78,7 +78,13 @@ export default function OnboardingWizard() {
   async function save() {
     if (!profile) return;
     setLoading(true);
-    await saveOnboarding({ profile, cvText, answers });
+    setError(null);
+    const res = await saveOnboarding({ profile, cvText, answers });
+    // On success saveOnboarding redirects; if it returns, it failed.
+    if (res?.error) {
+      setError(res.error);
+      setLoading(false);
+    }
   }
 
   return (
@@ -159,6 +165,8 @@ export default function OnboardingWizard() {
               </div>
             </div>
           )}
+
+          {error && <p className="rounded-xl bg-red-50 px-3 py-2.5 text-sm text-red-600">{error}</p>}
 
           <div className="flex items-center justify-between pt-1">
             <button className="btn-ghost" onClick={() => setStep("input")}>Back</button>
