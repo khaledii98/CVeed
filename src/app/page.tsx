@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { devLogin } from "./dev-login/actions";
 
 export default async function Home() {
   const supabase = createClient();
@@ -15,6 +16,10 @@ export default async function Home() {
   } catch {
     // not configured — render the public landing
   }
+
+  // TESTING: when DEV_BYPASS=1, the cards drop you straight into the app
+  // (no sign-up / login page). Off for the public; removed before launch.
+  const bypass = process.env.DEV_BYPASS === "1";
 
   return (
     <section className="container-x flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center pb-24 text-center">
@@ -31,7 +36,8 @@ export default async function Home() {
 
       <div className="mt-10 grid w-full max-w-2xl animate-fade-up gap-4 [animation-delay:180ms] sm:grid-cols-2">
         <ChoiceCard
-          href="/signup?role=employer"
+          href={bypass ? undefined : "/signup?role=employer"}
+          action={bypass ? devLogin.bind(null, "employer") : undefined}
           title="I'm hiring"
           desc="Describe a role and get a ranked, explained shortlist."
           cta="Start hiring"
@@ -39,7 +45,8 @@ export default async function Home() {
           accent
         />
         <ChoiceCard
-          href="/signup?role=candidate"
+          href={bypass ? undefined : "/signup?role=candidate"}
+          action={bypass ? devLogin.bind(null, "candidate") : undefined}
           title="I'm looking for a job"
           desc="Build your profile once and get discovered by employers."
           cta="Create profile"
@@ -47,27 +54,30 @@ export default async function Home() {
         />
       </div>
 
-      <p className="mt-8 animate-fade-up text-sm text-ink/45 [animation-delay:240ms]">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-brand hover:text-brand-dark">Sign in</Link>
-      </p>
+      {bypass ? (
+        <p className="mt-8 animate-fade-up text-sm text-ink/45 [animation-delay:240ms]">
+          Testing mode — login is bypassed.
+        </p>
+      ) : (
+        <p className="mt-8 animate-fade-up text-sm text-ink/45 [animation-delay:240ms]">
+          Already have an account?{" "}
+          <Link href="/login" className="font-medium text-brand hover:text-brand-dark">Sign in</Link>
+        </p>
+      )}
     </section>
   );
 }
 
 function ChoiceCard({
-  href, title, desc, cta, icon, accent = false,
+  href, action, title, desc, cta, icon, accent = false,
 }: {
-  href: string; title: string; desc: string; cta: string; icon: React.ReactNode; accent?: boolean;
+  href?: string;
+  action?: () => void;
+  title: string; desc: string; cta: string; icon: React.ReactNode; accent?: boolean;
 }) {
-  return (
-    <Link
-      href={href}
-      className="card group flex flex-col items-start p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift"
-    >
-      <span
-        className={`grid h-11 w-11 place-items-center rounded-xl ${accent ? "bg-brand text-white" : "bg-brand-light text-brand"}`}
-      >
+  const inner = (
+    <>
+      <span className={`grid h-11 w-11 place-items-center rounded-xl ${accent ? "bg-brand text-white" : "bg-brand-light text-brand"}`}>
         {icon}
       </span>
       <h3 className="mt-4 text-lg font-semibold text-ink">{title}</h3>
@@ -78,8 +88,19 @@ function ChoiceCard({
           <path d="M5 10h10M11 6l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </span>
-    </Link>
+    </>
   );
+
+  const cls = "card group flex w-full flex-col items-start p-6 text-left transition-all hover:-translate-y-0.5 hover:shadow-lift";
+
+  if (action) {
+    return (
+      <form action={action} className="contents">
+        <button type="submit" className={cls}>{inner}</button>
+      </form>
+    );
+  }
+  return <Link href={href!} className={cls}>{inner}</Link>;
 }
 
 function BriefcaseIcon() {
